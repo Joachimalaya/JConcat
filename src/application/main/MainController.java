@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import application.config.AppConfig;
 import application.main.service.ConcatService;
+import application.main.service.InputOrganizationService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -34,120 +35,49 @@ public class MainController implements Initializable {
 	private TextArea terminalArea;
 
 	@FXML
-	private TextField ffmpegPathLabel;
+	private TextField ffmpegPathField;
 
 	@FXML
-	private Button startButton, stopButton;
+	private Button startButton;
+	
+	@FXML
+	private Button stopButton;
 
 	public static final Logger log = Main.log;
 
 	private ConcatService concat;
+	private InputOrganizationService inputOrganizationService;
+	
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		ffmpegPathLabel.setText(AppConfig.ACTIVECONFIG.getPathToFFmpeg().toString());
+		ffmpegPathField.setText(AppConfig.ACTIVECONFIG.getPathToFFmpeg().toString());
+		inputOrganizationService = new InputOrganizationService();
 	}
 
 	@FXML
 	private void handleAddAction(ActionEvent event) {
 		log.log(Level.INFO, "add button clicked - trying to use FileChooser");
 
-		FileChooser chooser = new FileChooser();
-		chooser.setInitialDirectory(getSafeDirectory(AppConfig.ACTIVECONFIG.getLastInputFolder().toFile()));
-		chooser.setTitle("Select files to concatenate");
-
-		// TODO: add more extension filters
-		chooser.getExtensionFilters().addAll(new ExtensionFilter("all files", "*.*"),
-				new ExtensionFilter("mp4 files", "*.mp4"));
-
-		List<File> selectedFiles = chooser.showOpenMultipleDialog(((Control) event.getSource()).getScene().getWindow());
-
-		ArrayList<Path> addedFiles = new ArrayList<Path>();
-
-		if (selectedFiles != null && !selectedFiles.isEmpty()) {
-			AppConfig.ACTIVECONFIG.setLastInputFolder(selectedFiles.get(0).toPath().getParent());
-
-			log.log(Level.INFO, "FileChooser returned - " + selectedFiles.size() + " files selected");
-			for (File f : selectedFiles) {
-				// TODO: match for supported formats
-				// add file to complete list
-				addedFiles.add(f.toPath());
-			}
-			fileList.getItems().addAll(addedFiles);
-		} else {
-			log.log(Level.INFO, "selection canceled");
-		}
+		inputOrganizationService.addEntries(fileList, event);
 	}
 
 	@FXML
 	private void handleRemoveAction(ActionEvent event) {
 		log.log(Level.INFO, "attempting to remove entries from file selection list");
 
-		List<Integer> selection = new ArrayList<Integer>(fileList.getSelectionModel().getSelectedIndices());
-
-		// sort this list, to make sure it is sorted; trivial for sorted list
-		selection.sort(Integer::compare);
-
-		for (int i = selection.size() - 1; i >= 0; i--) {
-			fileList.getItems().remove((int) selection.get(i));
-		}
+		inputOrganizationService.deleteEntries(fileList);
 
 	}
 
 	@FXML
 	private void handleUpAction(ActionEvent event) {
-		if (isListCompact(fileList.getSelectionModel().getSelectedIndices())) {
-			List<Integer> selection = new ArrayList<Integer>(fileList.getSelectionModel().getSelectedIndices());
-
-			// sort this list, to make sure it is sorted; trivial for sorted
-			// list
-			selection.sort(Integer::compare);
-
-			int insertAt = selection.get(0) - 1;
-
-			if (insertAt >= 0) {
-				List<Path> stash = new ArrayList<Path>();
-				for (int i : selection) {
-					stash.add(fileList.getItems().get(i));
-				}
-
-				fileList.getItems().removeAll(stash);
-				fileList.getItems().addAll(insertAt, stash);
-
-				// reselect items
-				fileList.getSelectionModel().clearSelection();
-				fileList.getSelectionModel().selectRange(selection.get(0) - 1, selection.get(selection.size() - 1));
-				fileList.scrollTo(insertAt);
-			}
-		}
+		inputOrganizationService.moveEntriesUp(fileList);
 	}
 
 	@FXML
 	private void handleDownAction(ActionEvent event) {
-		if (isListCompact(fileList.getSelectionModel().getSelectedIndices())) {
-			List<Integer> selection = new ArrayList<Integer>(fileList.getSelectionModel().getSelectedIndices());
-
-			// sort this list, to make sure it is sorted; trivial for sorted
-			// list
-			selection.sort(Integer::compare);
-
-			int insertAt = selection.get(0) + 1;
-
-			if (insertAt <= fileList.getItems().size() - selection.size()) {
-				List<Path> stash = new ArrayList<Path>();
-				for (int i : selection) {
-					stash.add(fileList.getItems().get(i));
-				}
-
-				fileList.getItems().removeAll(stash);
-				fileList.getItems().addAll(insertAt, stash);
-
-				// reselect items
-				fileList.getSelectionModel().clearSelection();
-				fileList.getSelectionModel().selectRange(selection.get(0) + 1, selection.get(selection.size() - 1) + 2);
-				fileList.scrollTo(insertAt);
-			}
-		}
+		inputOrganizationService.moveEntriesDown(fileList);
 	}
 
 	@FXML
@@ -201,18 +131,12 @@ public class MainController implements Initializable {
 	private void handleSetFfmpegPathAction(ActionEvent event) {
 		log.log(Level.INFO, "selecting ffmpeg binary");
 
-		FileChooser chooser = new FileChooser();
-		chooser.setTitle("Select FFmpeg binary");
-
-		chooser.setInitialDirectory(getSafeDirectory(AppConfig.ACTIVECONFIG.getPathToFFmpeg().getParent().toFile()));
-		chooser.setInitialFileName(AppConfig.ACTIVECONFIG.getPathToFFmpeg().getFileName().toString());
-
-		File selectedBinary = chooser.showOpenDialog(((Control) event.getSource()).getScene().getWindow());
-
-		if (selectedBinary != null) {
-			AppConfig.ACTIVECONFIG.setPathToFFmpeg(selectedBinary.toPath());
-			ffmpegPathLabel.setText(AppConfig.ACTIVECONFIG.getPathToFFmpeg().toString());
-		}
+		inputOrganizationService.setFFmpegPath(ffmpegPathField, event);
+	}
+	
+	@FXML
+	private void handleStopAction(ActionEvent event) {
+		concat.stopStartedProcess(startButton, stopButton);
 	}
 
 	/**
@@ -233,11 +157,6 @@ public class MainController implements Initializable {
 			}
 		}
 		return true;
-	}
-
-	@FXML
-	private void handleStopAction(ActionEvent event) {
-		concat.stopStartedProcess(startButton, stopButton);
 	}
 
 	/**
