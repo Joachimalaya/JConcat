@@ -165,6 +165,11 @@ public class MainController implements Initializable {
 
 			File targetFile = targetChooser.showSaveDialog(((Control) event.getSource()).getScene().getWindow());
 			if (targetFile != null) {
+				// ensure targetFile has a file extension
+				if(!targetFile.getName().endsWith("\\.mp4")){
+					targetFile = new File(targetFile.getAbsolutePath() + ".mp4");
+				}
+				
 				if (!targetFile.exists() || targetFile.delete()) {
 					// TODO: notify user if deleting failed
 
