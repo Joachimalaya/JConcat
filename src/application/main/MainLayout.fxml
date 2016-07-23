@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.GridPane?>
+<?import java.net.*?>
+<?import java.lang.Integer?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.SelectionMode?>
+<?language javascript?>
+
+<GridPane xmlns:fx="http://javafx.com/fxml/1" styleClass="root"
+	hgap="5" vgap="5" fx:controller="application.main.MainController">
+	<padding>
+		<Insets top="5" right="5" bottom="5" left="5" />
+	</padding>
+	<Button GridPane.columnIndex="0" GridPane.rowIndex="0"
+		GridPane.columnSpan="2" text="add files to list..." onAction="#handleAddAction"
+		maxWidth="Infinity" />
+
+	<Button GridPane.columnIndex="0" GridPane.rowIndex="1"
+		GridPane.columnSpan="2" text="remove selected entries from list"
+		onAction="#handleRemoveAction" maxWidth="Infinity" />
+
+	<Button GridPane.columnIndex="0" GridPane.rowIndex="2"
+		GridPane.columnSpan="2" text="move selection up" onAction="#handleUpAction"
+		maxWidth="Infinity" />
+
+	<Button GridPane.columnIndex="0" GridPane.rowIndex="3"
+		GridPane.columnSpan="2" text="move selection down" onAction="#handleDownAction"
+		maxWidth="Infinity" />
+	<Separator GridPane.columnIndex="0" GridPane.rowIndex="4"
+		GridPane.columnSpan="2" />
+
+	<Label GridPane.columnIndex="0" GridPane.rowIndex="5"
+		GridPane.columnSpan="2" text="Path to FFmpeg:" />
+	<TextField GridPane.columnIndex="0" GridPane.rowIndex="6"
+		GridPane.columnSpan="2" fx:id="ffmpegPathLabel" editable="true" />
+
+	<Button GridPane.columnIndex="0" GridPane.rowIndex="7"
+		GridPane.columnSpan="2" text="set path to FFmpeg..." onAction="#handleSetFfmpegPathAction"
+		maxWidth="Infinity" />
+
+	<Button GridPane.columnIndex="0" GridPane.rowIndex="11"
+		GridPane.columnSpan="2" text="start concatenation..." maxWidth="Infinity"
+		onAction="#handleConcatAction" fx:id="startButton" />
+	<Button GridPane.columnIndex="0" GridPane.rowIndex="12"
+		GridPane.columnSpan="2" text="stop concatenation process" maxWidth="Infinity"
+		onAction="#handleStopAction" disable="true" fx:id="stopButton" />
+	<ListView GridPane.columnIndex="2" GridPane.rowIndex="0"
+		GridPane.rowSpan="10" fx:id="fileList" />
+	<fx:script>
+		fileList.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
+	</fx:script>
+	<TextArea GridPane.columnIndex="2" GridPane.rowIndex="11"
+		GridPane.rowSpan="3" fx:id="terminalArea" editable="false"
+		text="Welcome to JConcat - FFmpeg output will appear here" />
+
+	<columnConstraints>
+		<ColumnConstraints hgrow="NEVER" minWidth="10.0"
+			prefWidth="100.0" />
+		<ColumnConstraints hgrow="NEVER" minWidth="10.0"
+			prefWidth="100.0" />
+		<ColumnConstraints hgrow="ALWAYS" minWidth="10.0"
+			prefWidth="100.0" />
+	</columnConstraints>
+	<rowConstraints>
+		<RowConstraints vgrow="NEVER" />
+		<RowConstraints vgrow="NEVER" />
+		<RowConstraints vgrow="NEVER" />
+		<RowConstraints vgrow="NEVER" />
+		<RowConstraints vgrow="NEVER" />
+		<RowConstraints vgrow="NEVER" />
+		<RowConstraints vgrow="NEVER" />
+		<RowConstraints vgrow="NEVER" />
+		<RowConstraints vgrow="ALWAYS" />
+		<RowConstraints vgrow="NEVER" />
+		<RowConstraints vgrow="NEVER" />
+		<RowConstraints vgrow="NEVER" />
+		<RowConstraints vgrow="NEVER" />
+	</rowConstraints>
+</GridPane>
+
