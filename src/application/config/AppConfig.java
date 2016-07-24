@@ -7,6 +7,14 @@ import java.util.logging.Level;
 
 import application.main.Main;
 
+/**
+ * An AppConfig holds information about user activity that should be persisted
+ * between sessions. These information can be loaded and saved in JSON files, so
+ * the content has to be serializable.
+ * 
+ * @author joachim
+ *
+ */
 public class AppConfig {
 
 	public static AppConfig ACTIVECONFIG;
@@ -15,8 +23,7 @@ public class AppConfig {
 		try {
 			ACTIVECONFIG = ConfigAccessor.readFromDefault();
 		} catch (IOException e) {
-			Main.log.log(Level.SEVERE,
-					"config file could not be read - empty config is used", e);
+			Main.log.log(Level.SEVERE, "config file could not be read - empty config is used", e);
 			ACTIVECONFIG = new AppConfig();
 		}
 	}
@@ -33,8 +40,7 @@ public class AppConfig {
 		lastOutputFile = Paths.get("./output.mp4");
 	}
 
-	public AppConfig(Path pathToFFmpeg, Path lastInputFolder,
-			Path lastOutputFile) {
+	public AppConfig(Path pathToFFmpeg, Path lastInputFolder, Path lastOutputFile) {
 		this.pathToFFmpeg = pathToFFmpeg;
 		this.lastInputFolder = lastInputFolder;
 		this.lastOutputFile = lastOutputFile;
@@ -63,5 +69,5 @@ public class AppConfig {
 	public void setLastOutputFile(Path lastOutputFile) {
 		this.lastOutputFile = lastOutputFile;
 	}
-	
+
 }

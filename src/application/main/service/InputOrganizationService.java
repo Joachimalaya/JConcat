@@ -18,12 +18,20 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 public class InputOrganizationService {
-	
+
 	public static final Logger log = Main.log;
 
-	public void addEntries(ListView<Path> fileList, ActionEvent event){
+	/**
+	 * Shows a file choosing dialog to the user and add selected files to the
+	 * given fileList.
+	 * 
+	 * @param fileList
+	 * @param event
+	 */
+	public void addEntries(ListView<Path> fileList, ActionEvent event) {
 		FileChooser chooser = new FileChooser();
-		chooser.setInitialDirectory(MainController.getSafeDirectory(AppConfig.ACTIVECONFIG.getLastInputFolder().toFile()));
+		chooser.setInitialDirectory(
+				MainController.getSafeDirectory(AppConfig.ACTIVECONFIG.getLastInputFolder().toFile()));
 		chooser.setTitle("Select files to concatenate");
 
 		// TODO: add more extension filters
@@ -48,8 +56,14 @@ public class InputOrganizationService {
 			log.log(Level.INFO, "selection canceled");
 		}
 	}
-	
-	public void deleteEntries(ListView<Path> fileList){
+
+	/**
+	 * Remove selected entries from the fileList. To remove multiple entries at
+	 * once, they have to be compact.
+	 * 
+	 * @param fileList
+	 */
+	public void deleteEntries(ListView<Path> fileList) {
 		List<Integer> selection = new ArrayList<Integer>(fileList.getSelectionModel().getSelectedIndices());
 
 		// sort this list, to make sure it is sorted; trivial for sorted list
@@ -59,8 +73,13 @@ public class InputOrganizationService {
 			fileList.getItems().remove((int) selection.get(i));
 		}
 	}
-	
-	public void moveEntriesUp(ListView<Path> fileList){
+
+	/**
+	 * Move selected entries up the fileList.
+	 * 
+	 * @param fileList
+	 */
+	public void moveEntriesUp(ListView<Path> fileList) {
 		if (MainController.isListCompact(fileList.getSelectionModel().getSelectedIndices())) {
 			List<Integer> selection = new ArrayList<Integer>(fileList.getSelectionModel().getSelectedIndices());
 
@@ -86,8 +105,13 @@ public class InputOrganizationService {
 			}
 		}
 	}
-	
-	public void moveEntriesDown(ListView<Path> fileList){
+
+	/**
+	 * Move selected entries down the fileList.
+	 * 
+	 * @param fileList
+	 */
+	public void moveEntriesDown(ListView<Path> fileList) {
 		if (MainController.isListCompact(fileList.getSelectionModel().getSelectedIndices())) {
 			List<Integer> selection = new ArrayList<Integer>(fileList.getSelectionModel().getSelectedIndices());
 
@@ -113,12 +137,20 @@ public class InputOrganizationService {
 			}
 		}
 	}
-	
-	public void setFFmpegPath(TextField ffmpegPath, ActionEvent event){
+
+	/**
+	 * Open a file choosing dialog where the user can select the location of of
+	 * the FFmpeg binary.
+	 * 
+	 * @param ffmpegPath
+	 * @param event
+	 */
+	public void setFFmpegPath(TextField ffmpegPath, ActionEvent event) {
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle("Select FFmpeg binary");
 
-		chooser.setInitialDirectory(MainController.getSafeDirectory(AppConfig.ACTIVECONFIG.getPathToFFmpeg().getParent().toFile()));
+		chooser.setInitialDirectory(
+				MainController.getSafeDirectory(AppConfig.ACTIVECONFIG.getPathToFFmpeg().getParent().toFile()));
 		chooser.setInitialFileName(AppConfig.ACTIVECONFIG.getPathToFFmpeg().getFileName().toString());
 
 		File selectedBinary = chooser.showOpenDialog(((Control) event.getSource()).getScene().getWindow());
@@ -128,5 +160,5 @@ public class InputOrganizationService {
 			ffmpegPath.setText(AppConfig.ACTIVECONFIG.getPathToFFmpeg().toString());
 		}
 	}
-	
+
 }

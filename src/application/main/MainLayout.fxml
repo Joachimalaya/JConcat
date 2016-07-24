@@ -42,7 +42,7 @@
 	<Label GridPane.columnIndex="0" GridPane.rowIndex="5"
 		GridPane.columnSpan="2" text="Path to FFmpeg:" />
 	<TextField GridPane.columnIndex="0" GridPane.rowIndex="6"
-		GridPane.columnSpan="2" fx:id="ffmpegPathLabel" editable="true" />
+		GridPane.columnSpan="2" fx:id="ffmpegPathField" editable="true" />
 
 	<Button GridPane.columnIndex="0" GridPane.rowIndex="7"
 		GridPane.columnSpan="2" text="set path to FFmpeg..." onAction="#handleSetFfmpegPathAction"

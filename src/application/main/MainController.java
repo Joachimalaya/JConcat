@@ -19,12 +19,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.Control;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 
 public class MainController implements Initializable {
 
@@ -45,7 +42,7 @@ public class MainController implements Initializable {
 
 	public static final Logger log = Main.log;
 
-	private ConcatService concat;
+	private ConcatService concatService;
 	private InputOrganizationService inputOrganizationService;
 	
 
@@ -84,19 +81,13 @@ public class MainController implements Initializable {
 	private void handleConcatAction(ActionEvent event) {
 		if (fileList.getItems().size() > 1) {
 			log.log(Level.INFO, "asking for target file");
-			FileChooser targetChooser = new FileChooser();
-			targetChooser.setTitle("Specify output file");
-
-			targetChooser.setInitialDirectory(getSafeDirectory(AppConfig.ACTIVECONFIG.getLastOutputFile().getParent().toFile()));
-			targetChooser.setInitialFileName(AppConfig.ACTIVECONFIG.getLastOutputFile().getFileName().toString());
-
-			targetChooser.getExtensionFilters().addAll(new ExtensionFilter("all files", "*.*"),
-					new ExtensionFilter("mp4 files", "*.mp4"));
-
-			File targetFile = targetChooser.showSaveDialog(((Control) event.getSource()).getScene().getWindow());
+			
+			File targetFile = concatService.askForOutputFile(event);
+			
 			if (targetFile != null) {
 				// ensure targetFile has a file extension
-				if(!targetFile.getName().endsWith("\\.mp4")){
+				// TODO: this can lead to overwriting a file, without telling the user
+				if(!targetFile.getName().endsWith(".mp4")){
 					targetFile = new File(targetFile.getAbsolutePath() + ".mp4");
 				}
 				
@@ -106,13 +97,11 @@ public class MainController implements Initializable {
 					AppConfig.ACTIVECONFIG.setLastOutputFile(targetFile.toPath());
 
 					log.log(Level.INFO, "starting concatenation");
-					concat = new ConcatService();
-					Path listFile;
+					concatService = new ConcatService();
 					try {
-						listFile = concat.createListFile(fileList.getItems());
-						concat.startConcatenation(terminalArea, startButton, stopButton, listFile, targetFile.toPath());
+						Path listFile = concatService.createListFile(fileList.getItems());
+						concatService.startConcatenation(terminalArea, startButton, stopButton, listFile, targetFile.toPath());
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -136,7 +125,7 @@ public class MainController implements Initializable {
 	
 	@FXML
 	private void handleStopAction(ActionEvent event) {
-		concat.stopStartedProcess(startButton, stopButton);
+		concatService.stopStartedProcess(startButton, stopButton);
 	}
 
 	/**
