@@ -50,6 +50,7 @@ public class MainController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		ffmpegPathField.setText(AppConfig.ACTIVECONFIG.getPathToFFmpeg().toString());
 		inputOrganizationService = new InputOrganizationService();
+		concatService = new ConcatService();
 	}
 
 	@FXML
@@ -97,7 +98,6 @@ public class MainController implements Initializable {
 					AppConfig.ACTIVECONFIG.setLastOutputFile(targetFile.toPath());
 
 					log.log(Level.INFO, "starting concatenation");
-					concatService = new ConcatService();
 					try {
 						Path listFile = concatService.createListFile(fileList.getItems());
 						concatService.startConcatenation(terminalArea, startButton, stopButton, listFile, targetFile.toPath());
