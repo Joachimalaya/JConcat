@@ -78,14 +78,14 @@ public class ConcatService {
 			Path targetFile) {
 
 		try {
-			FFmpeg ffmpeg = new FFmpeg(AppConfig.ACTIVECONFIG.getPathToFFmpeg().toString());
+			FFmpeg ffmpeg = new FFmpeg(AppConfig.ACTIVECONFIG.getFFmpegExecutable());
+			FFprobe ffprobe = new FFprobe(AppConfig.ACTIVECONFIG.getFFprobeExecutable());
 
 			FFmpegBuilder ffmpegBuilder = new FFmpegBuilder().addExtraArgs("-f", "concat").addInput(fileList.toString())
 					.addOutput(targetFile.toString()).addExtraArgs("-c", "copy").done();
 
 			// TODO: ask user for install directory instead of ffmpeg executable
-			FFmpegExecutor executor = new FFmpegExecutor(ffmpeg,
-					new FFprobe(AppConfig.ACTIVECONFIG.getPathToFFmpeg().getParent().toString() + "/ffprobe"));
+			FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
 
 			wrapperThread = new Thread(executor.createJob(ffmpegBuilder));
 
@@ -94,7 +94,7 @@ public class ConcatService {
 			wrapperThread.start();
 
 			terminalArea.appendText(
-					"progress display and debug output from ffmpeg are currently not supported; please wait for further output on this terminal...");
+					"\nprogress display and debug output from ffmpeg are currently not supported; please wait for further output on this terminal...");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

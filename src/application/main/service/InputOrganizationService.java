@@ -14,6 +14,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Control;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -146,14 +147,13 @@ public class InputOrganizationService {
 	 * @param event
 	 */
 	public void setFFmpegPath(TextField ffmpegPath, ActionEvent event) {
-		FileChooser chooser = new FileChooser();
-		chooser.setTitle("Select FFmpeg binary");
+		DirectoryChooser chooser = new DirectoryChooser();
+		chooser.setTitle("Select FFmpeg binary directory");
 
 		chooser.setInitialDirectory(
 				MainController.getSafeDirectory(AppConfig.ACTIVECONFIG.getPathToFFmpeg().getParent().toFile()));
-		chooser.setInitialFileName(AppConfig.ACTIVECONFIG.getPathToFFmpeg().getFileName().toString());
 
-		File selectedBinary = chooser.showOpenDialog(((Control) event.getSource()).getScene().getWindow());
+		File selectedBinary = chooser.showDialog(((Control) event.getSource()).getScene().getWindow());
 
 		if (selectedBinary != null) {
 			AppConfig.ACTIVECONFIG.setPathToFFmpeg(selectedBinary.toPath());

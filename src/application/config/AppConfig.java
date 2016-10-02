@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import application.main.Main;
 
 /**
@@ -35,7 +37,7 @@ public class AppConfig {
 	private Path lastOutputFile;
 
 	public AppConfig() {
-		pathToFFmpeg = Paths.get("./ffmpeg.exe");
+		pathToFFmpeg = Paths.get("./ffmpeg/");
 		lastInputFolder = Paths.get(".");
 		lastOutputFile = Paths.get("./output.mp4");
 	}
@@ -68,6 +70,22 @@ public class AppConfig {
 
 	public void setLastOutputFile(Path lastOutputFile) {
 		this.lastOutputFile = lastOutputFile;
+	}
+	
+	public String getFFmpegExecutable(){
+		if(SystemUtils.IS_OS_WINDOWS){
+			return ACTIVECONFIG.pathToFFmpeg + "/ffmpeg.exe";
+		} else {
+			return ACTIVECONFIG.pathToFFmpeg + "/ffmpeg";
+		}
+	}
+	
+	public String getFFprobeExecutable(){
+		if(SystemUtils.IS_OS_WINDOWS){
+			return ACTIVECONFIG.pathToFFmpeg + "/ffprobe.exe";
+		} else {
+			return ACTIVECONFIG.pathToFFmpeg + "/ffprobe";
+		}
 	}
 
 }
