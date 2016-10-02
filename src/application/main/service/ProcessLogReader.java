@@ -1,7 +1,5 @@
 package application.main.service;
 
-import java.io.IOException;
-
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 
@@ -9,14 +7,14 @@ public class ProcessLogReader extends Thread {
 
 	private static final int PROCESSLOGSIZE = 2000;
 
-	private Process process;
+	private Thread wrapperThread;
 
 	private TextArea terminalArea;
 	private Button startButton;
 	private Button stopButton;
 
-	public ProcessLogReader(Process process, TextArea terminalArea, Button startButton, Button stopButton) {
-		this.process = process;
+	public ProcessLogReader(Thread wrapperThread, TextArea terminalArea, Button startButton, Button stopButton) {
+		this.wrapperThread = wrapperThread;
 		this.terminalArea = terminalArea;
 		this.startButton = startButton;
 		this.stopButton = stopButton;
@@ -24,13 +22,13 @@ public class ProcessLogReader extends Thread {
 
 	@Override
 	public void run() {
-		try {
-			while (process.isAlive()) {
-				readProcessOutput(terminalArea);
+		while(wrapperThread.getState() == State.NEW || wrapperThread.isAlive()){
+			// TODO: do stuff; read output
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// nothing to do
 			}
-			readProcessOutput(terminalArea);
-		} catch (IOException e) {
-			// TODO: handle exception
 		}
 		terminalArea.appendText("\nfinished concatenation");
 		startButton.setDisable(false);
@@ -45,18 +43,19 @@ public class ProcessLogReader extends Thread {
 	 * @param terminalArea
 	 * @throws IOException
 	 */
-	private void readProcessOutput(TextArea terminalArea) throws IOException {
-		int toRead = process.getErrorStream().available();
-		if (toRead > 0) {
-			byte[] readData = new byte[PROCESSLOGSIZE];
-			process.getErrorStream().read(readData);
-			StringBuilder builder = new StringBuilder();
-			for (byte b : readData) {
-				builder.append((char) b);
-			}
-			builder.append("\n");
-			terminalArea.appendText(builder.toString());
-		}
-	}
+	// TODO: does not work for new approach; rewrite
+//	private void readProcessOutput(TextArea terminalArea) throws IOException {
+//		int toRead = wrapperThread.getErrorStream().available();
+//		if (toRead > 0) {
+//			byte[] readData = new byte[PROCESSLOGSIZE];
+//			wrapperThread.getErrorStream().read(readData);
+//			StringBuilder builder = new StringBuilder();
+//			for (byte b : readData) {
+//				builder.append((char) b);
+//			}
+//			builder.append("\n");
+//			terminalArea.appendText(builder.toString());
+//		}
+//	}
 
 }

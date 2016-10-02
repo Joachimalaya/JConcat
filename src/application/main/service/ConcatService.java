@@ -14,6 +14,10 @@ import javafx.scene.control.Control;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
 
 /**
  * The ConcatService handles the call to FFmpeg via command line and relays
@@ -24,7 +28,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
  */
 public class ConcatService {
 
-	private Process process;
+	private Thread wrapperThread;
 
 	/**
 	 * A started concatenation process may be cancelled by calling this method.
@@ -32,27 +36,29 @@ public class ConcatService {
 	 * @param startButton
 	 * @param stopButton
 	 */
+	// TODO: not implemented; possible?
 	public void stopStartedProcess(Button startButton, Button stopButton) {
-		if (process != null && process.isAlive()) {
-			process.destroy();
-			startButton.setDisable(false);
-			stopButton.setDisable(true);
-		}
+		// if (process != null && process.isAlive()) {
+		// process.destroy();
+		// startButton.setDisable(false);
+		// stopButton.setDisable(true);
+		// }
 	}
-	
-	public File askForOutputFile(ActionEvent event){
-	FileChooser targetChooser = new FileChooser();
-	targetChooser.setTitle("Specify output file");
 
-	targetChooser.setInitialDirectory(MainController.getSafeDirectory(AppConfig.ACTIVECONFIG.getLastOutputFile().getParent().toFile()));
-	targetChooser.setInitialFileName(AppConfig.ACTIVECONFIG.getLastOutputFile().getFileName().toString());
+	public File askForOutputFile(ActionEvent event) {
+		FileChooser targetChooser = new FileChooser();
+		targetChooser.setTitle("Specify output file");
 
-	targetChooser.getExtensionFilters().addAll(new ExtensionFilter("all files", "*.*"),
-			new ExtensionFilter("mp4 files", "*.mp4"));
+		targetChooser.setInitialDirectory(
+				MainController.getSafeDirectory(AppConfig.ACTIVECONFIG.getLastOutputFile().getParent().toFile()));
+		targetChooser.setInitialFileName(AppConfig.ACTIVECONFIG.getLastOutputFile().getFileName().toString());
 
-	File targetFile = targetChooser.showSaveDialog(((Control) event.getSource()).getScene().getWindow());
-	
-	return targetFile;
+		targetChooser.getExtensionFilters().addAll(new ExtensionFilter("all files", "*.*"),
+				new ExtensionFilter("mp4 files", "*.mp4"));
+
+		File targetFile = targetChooser.showSaveDialog(((Control) event.getSource()).getScene().getWindow());
+
+		return targetFile;
 	}
 
 	/**
@@ -70,23 +76,27 @@ public class ConcatService {
 	 */
 	public void startConcatenation(TextArea terminalArea, Button startButton, Button stopButton, Path fileList,
 			Path targetFile) {
-		StringBuilder commandBuilder = new StringBuilder();
-		commandBuilder.append(AppConfig.ACTIVECONFIG.getPathToFFmpeg().toString());
-		commandBuilder.append(" -f concat -i ");
-		commandBuilder.append(fileList.toString());
-		commandBuilder.append(" -c copy ");
-		commandBuilder.append(targetFile.toString());
 
 		try {
-			terminalArea.clear();
-			process = Runtime.getRuntime().exec(commandBuilder.toString());
+			FFmpeg ffmpeg = new FFmpeg(AppConfig.ACTIVECONFIG.getPathToFFmpeg().toString());
 
-			startButton.setDisable(true);
-			stopButton.setDisable(false);
+			FFmpegBuilder ffmpegBuilder = new FFmpegBuilder().addExtraArgs("-f", "concat").addInput(fileList.toString())
+					.addOutput(targetFile.toString()).addExtraArgs("-c", "copy").done();
 
-			Thread readThread = new ProcessLogReader(process, terminalArea, startButton, stopButton);
-			readThread.start();
+			// TODO: ask user for install directory instead of ffmpeg executable
+			FFmpegExecutor executor = new FFmpegExecutor(ffmpeg,
+					new FFprobe(AppConfig.ACTIVECONFIG.getPathToFFmpeg().getParent().toString() + "/ffprobe"));
+
+			wrapperThread = new Thread(executor.createJob(ffmpegBuilder));
+
+			ProcessLogReader plr = new ProcessLogReader(wrapperThread, terminalArea, startButton, stopButton);
+			plr.start();
+			wrapperThread.start();
+
+			terminalArea.appendText(
+					"progress display and debug output from ffmpeg are currently not supported; please wait for further output on this terminal...");
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -117,4 +127,5 @@ public class ConcatService {
 
 		return listFile.toPath();
 	}
+
 }
