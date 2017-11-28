@@ -63,8 +63,8 @@ public class ConcatService {
 
 	/**
 	 * Calling this method will cause a call to the configured FFmpeg location.
-	 * Arguments to FFmpeg are the location of the temporary fileList file and
-	 * the output target.
+	 * Arguments to FFmpeg are the location of the temporary fileList file and the
+	 * output target.
 	 * 
 	 * Outputs from FFmpeg will be displayed in the given terminalArea.
 	 * 
@@ -76,34 +76,24 @@ public class ConcatService {
 	 */
 	public void startConcatenation(TextArea terminalArea, Button startButton, Button stopButton, Path fileList,
 			Path targetFile) {
-
 		try {
 			FFmpeg ffmpeg = new FFmpeg(AppConfig.ACTIVECONFIG.getFFmpegExecutable());
 			FFprobe ffprobe = new FFprobe(AppConfig.ACTIVECONFIG.getFFprobeExecutable());
 
-			FFmpegBuilder ffmpegBuilder = new FFmpegBuilder().addExtraArgs("-f", "concat").addInput(fileList.toString())
-					.addOutput(targetFile.toString()).addExtraArgs("-c", "copy").done();
+			FFmpegBuilder ffmpegBuilder = new FFmpegBuilder().addExtraArgs("-f", "concat").addExtraArgs("-safe", "0")
+					.addInput(fileList.toString()).addOutput(targetFile.toString()).addExtraArgs("-c", "copy").done();
 
-			// TODO: ask user for install directory instead of ffmpeg executable
 			FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
 
-			wrapperThread = new Thread(executor.createJob(ffmpegBuilder));
-
-			ProcessLogReader plr = new ProcessLogReader(wrapperThread, terminalArea, startButton, stopButton);
-			plr.start();
+			wrapperThread = new Thread(executor.createJob(ffmpegBuilder, new ProgressLogger(terminalArea)));
 			wrapperThread.start();
-
-			terminalArea.appendText(
-					"\nprogress display and debug output from ffmpeg are currently not supported; please wait for further output on this terminal...");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * Create the temporary file, that is read by FFmpeg to determine input
-	 * files.
+	 * Create the temporary file, that is read by FFmpeg to determine input files.
 	 * 
 	 * @param files
 	 * @return

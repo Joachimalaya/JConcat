@@ -1,5 +1,5 @@
 package application.main;
-	
+
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,20 +22,18 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			Parent root = FXMLLoader.load(getClass().getResource(
-					LAYOUTPATH));
+			Parent root = FXMLLoader.load(getClass().getResource(LAYOUTPATH));
 			Scene scene = new Scene(root);
-			scene.getStylesheets().add(
-					getClass().getResource("application.css").toExternalForm());
+			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			primaryStage.setScene(scene);
 			primaryStage.setMinWidth(720);
 			primaryStage.setMinHeight(640);
 			primaryStage.setMaximized(true);
 			primaryStage.show();
 			primaryStage.setTitle("JConcat");
-			
+
 			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-				
+
 				@Override
 				public void handle(WindowEvent event) {
 					try {
@@ -46,11 +44,10 @@ public class Main extends Application {
 					}
 				}
 			});
-			
+
 		} catch (IOException e) {
-			log.log(Level.SEVERE,
-					"could not read fxml file used for layout from " + LAYOUTPATH + " - unable to show UI; program will terminate",
-					e);
+			log.log(Level.SEVERE, "could not read fxml file used for layout from " + LAYOUTPATH
+					+ " - unable to show UI; program will terminate", e);
 		}
 	}
 
@@ -59,7 +56,7 @@ public class Main extends Application {
 		for (String a : args) {
 			mainArgs += " " + a;
 		}
-		log.log(Level.INFO, "program call arguments:" + mainArgs);
+		log.log(Level.INFO, "program call arguments: " + mainArgs);
 		launch(args);
 	}
 }
